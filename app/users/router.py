@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
-from fastapi.openapi.models import Response
+from fastapi import Response
 
 from app.users.auth import get_password_hash, authenticate_user, create_access_token
 from app.users.dao import UsersDAO
@@ -28,6 +28,6 @@ async def login_user(response: Response, user_data: SUserAuth):
     user = await authenticate_user(user_data.email, user_data.password)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-    access_token = create_access_token({"sub":user.id})
+    access_token = create_access_token({"sub": str(user.id)})
     response.set_cookie(key="booking_access_token", value=access_token, httponly=True)
     return {"access_token": access_token}
