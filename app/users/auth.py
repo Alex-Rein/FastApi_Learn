@@ -29,10 +29,10 @@ def create_access_token(data: dict):
     encoded_jwt = jwt.encode(
         to_encode, key=settings.SECRET_KEY, algorithm=settings.ALGORITHM
     )
-    return {'token': encoded_jwt}
+    return encoded_jwt
 
 async def authenticate_user(email: EmailStr, password: str):
-    user = await UsersDAO.find_one_or_none(email=email, password=password)
-    if not user and not verify_password(password, user.password):
+    user = await UsersDAO.find_one_or_none(email=email)
+    if not user and not verify_password(password, user.hashed_password):
         return None
     return user

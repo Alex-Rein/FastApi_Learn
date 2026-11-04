@@ -11,7 +11,7 @@ from app.users.dao import UsersDAO
 def get_token(request: Request):
     token = request.cookies.get("booking_access_token")
     if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     return token
 
 
@@ -24,13 +24,7 @@ async def get_current_user(token: str = Depends(get_token)):
         raise HTTPException(status_code=401, detail="Invalid token")
 
     expire: str = payload.get("exp")
-    print("==========================")
-    print("==========================")
-    print("expire =", expire)
-    print("timestamp =", datetime.datetime.now(datetime.UTC).timestamp())
-    print("==========================")
-    print("==========================")
-    if not expire or int(expire) < int(datetime.datetime.now(datetime.UTC).timestamp()):
+    if not expire or int(expire) < datetime.datetime.now(datetime.UTC).timestamp():
         raise HTTPException(status_code=401, detail="Invalid token")
 
     user_id: str = payload.get("sub")
