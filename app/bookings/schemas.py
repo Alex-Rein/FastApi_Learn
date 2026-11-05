@@ -1,6 +1,7 @@
 from datetime import date
+from typing import List
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class SBooking(BaseModel):
