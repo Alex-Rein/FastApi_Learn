@@ -15,7 +15,7 @@ app.include_router(bookings_router)
 
 
 class SHotel(BaseModel):
-    adress: str
+    address: str
     name: str
     stars: int
 
