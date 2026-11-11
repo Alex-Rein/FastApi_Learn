@@ -5,7 +5,7 @@ from fastapi import APIRouter, Request, Depends
 
 from app.bookings.dao import BookingDAO
 from app.bookings.schemas import SBooking
-from app.exceptions import RoomCannotBeBookedException
+from app.exceptions import RoomCannotBeBookedException, BookingIsNotExistException, BookingDeletionErrorException
 from app.users.dependencies import get_current_user
 from app.users.models import Users
 
@@ -31,5 +31,12 @@ async def add_booking(
 
 
 @router.delete("/{booking_id}")
-async def remove_booking(booking_id: int, user: Users = Depends(get_current_user)):
-    pass
+async def remove_booking(
+        booking_id: int,
+        user: Users = Depends(get_current_user)):
+    booking = await BookingDAO.find_by_id(booking_id)
+    if not booking:
+        raise BookingIsNotExistException
+    if booking.user_id != user.id:
+        raise BookingDeletionErrorException
+    await BookingDAO.delete(booking.id)

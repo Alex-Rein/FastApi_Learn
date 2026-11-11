@@ -35,3 +35,13 @@ RoomCannotBeBookedException = HTTPException(
     status_code=status.HTTP_409_CONFLICT,
     detail="Не осталось свободных номеров"
 )
+
+BookingIsNotExistException = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail="Бронирование не найдено"
+)
+
+BookingDeletionErrorException = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail="Бронирование не может быть удалено"
+)
