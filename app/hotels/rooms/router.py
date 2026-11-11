@@ -7,4 +7,4 @@ router = APIRouter(prefix='/hotels', tags=['Отели и номера'])
 
 @router.get("/{hotel_id}/rooms")
 async def get_rooms(hotel_id: int):
-    return await RoomsDAO.find_all(hotel_id=hotel_id)
+    return await RoomsDAO.find_all_hotel_rooms(hotel_id=hotel_id)

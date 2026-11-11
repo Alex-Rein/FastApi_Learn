@@ -9,7 +9,7 @@ class RoomsDAO(BaseDAO):
     model = Rooms
 
     @classmethod
-    async def find_all(cls, hotel_id: int):
+    async def find_all_hotel_rooms(cls, hotel_id: int):
         async with async_session_maker() as session:
             query = select(Rooms).where(Rooms.hotel_id == hotel_id)
             result = await session.execute(query)
