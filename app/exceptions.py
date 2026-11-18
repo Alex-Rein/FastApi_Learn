@@ -45,3 +45,15 @@ BookingDeletionErrorException = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND,
     detail="Бронирование не может быть удалено"
 )
+
+
+NoNeededFieldsException = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail="Нет необходимых полей"
+)
+
+
+HotelIsNotFoundException = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail="Отель не найден"
+)

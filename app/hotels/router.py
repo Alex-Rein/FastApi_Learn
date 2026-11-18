@@ -1,12 +1,13 @@
 from datetime import date
-from typing import Optional
+from typing import Optional, Dict
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import JSON
+from pydantic import Json
 
-from app.exceptions import UserIncorrectException
+from app.exceptions import UserIncorrectException, NoNeededFieldsException, HotelIsNotFoundException
 from app.hotels.dao import HotelsDAO
-from app.hotels.schemas import SHotels
+from app.hotels.models import Hotels
+from app.hotels.schemas import SHotels, SHotelsCreate, SHotelsUpdate
 from app.users.dependencies import get_current_user
 from app.users.models import Users
 
@@ -33,22 +34,18 @@ async def get_hotels(
 
 @router.post("")
 async def add_hotel(
-        name: str,
-        location: str,
-        services: Optional[JSON],
-        rooms_quantity: int,
-        image_id: Optional[int],
+        data: SHotelsCreate,
         user: Users = Depends(get_current_user)
 ):
     if not user:
         raise UserIncorrectException
 
-    hotel = HotelsDAO.add(
-        name=name,
-        location=location,
-        services=services,
-        rooms_quantity=rooms_quantity,
-        image_id=image_id,
+    payload = data.model_dump(exclude_unset=True)
+    if not payload:
+        raise NoNeededFieldsException
+
+    hotel = await HotelsDAO.add(
+        **payload
     )
 
     return hotel
@@ -62,29 +59,32 @@ async def delete_hotel(
     if not user:
         raise UserIncorrectException
 
-    return await HotelsDAO.delete(hotel_id)
+    result = await HotelsDAO.delete(hotel_id)
+    if not result:
+        raise HotelIsNotFoundException
+
+    return result
 
 
-@router.put("/{hotel_id}")
-async def update_hotel(         # TODO проверить и если нужно доделать распаковку данных для update
+@router.patch("/{hotel_id}")
+async def update_hotel(
         hotel_id: int,
-        name: Optional[str],
-        location: Optional[str],
-        services: Optional[JSON],
-        rooms_quantity: Optional[int],
-        image_id: Optional[int],
+        data: SHotelsUpdate,
         user: Users = Depends(get_current_user)
 ):
     if not user:
         raise UserIncorrectException
 
-    hotel = await HotelsDAO.update(
+    payload = data.model_dump(exclude_unset=True)
+    if not payload:
+        raise NoNeededFieldsException
+
+    updated = await HotelsDAO.update(
         hotel_id,
-        name=name,
-        location=location,
-        services=services,
-        rooms_quantity=rooms_quantity,
-        image_id=image_id
+        **payload
     )
 
-    return hotel
+    if not updated:
+        raise HotelIsNotFoundException
+
+    return updated

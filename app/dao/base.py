@@ -34,6 +34,7 @@ class BaseDAO:
             query = insert(cls.model).values(**data)
             await session.execute(query)
             await session.commit()
+            return {'message': 'success'}
 
     @classmethod
     async def delete(cls, model_id: int):
@@ -41,6 +42,7 @@ class BaseDAO:
             query = delete(cls.model).where(cls.model.id == model_id)
             await session.execute(query)
             await session.commit()
+            return {'message': 'success'}
 
     @classmethod
     async def update(cls, model_id: int, **data ):
@@ -48,4 +50,5 @@ class BaseDAO:
             query = update(cls.model).where(cls.model.id == model_id).values(**data)
             await session.execute(query)
             await session.commit()
+            return {'message': 'success'}
 
