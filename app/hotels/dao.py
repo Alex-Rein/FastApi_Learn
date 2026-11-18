@@ -19,10 +19,10 @@ class HotelsDAO(BaseDAO):
             date_from: date | None,
             date_to: date | None,
     ):
-        stmt = select(Hotels).where(Hotels.location.ilike(f'%{location}%'))
+        async with async_session_maker() as session:
+            stmt = select(Hotels).where(Hotels.location.ilike(f'%{location}%'))
 
         # Если даты не переданы
-        async with async_session_maker() as session:
             if date_from is None or date_to is None:
                 result = await session.execute(stmt)
                 return result.scalars().all()
