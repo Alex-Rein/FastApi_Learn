@@ -75,3 +75,9 @@ FailedToUpdateException = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST,
     detail="Не удалось обновить"
 )
+
+
+WrongDateException = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail='date_from должен быть меньше date_to'
+)

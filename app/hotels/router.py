@@ -1,11 +1,11 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
 from starlette import status
 
 from app.exceptions import UserIncorrectException, NoNeededFieldsException, HotelIsNotFoundException, \
-    FailedToAddException, FailedToUpdateException
+    FailedToAddException, FailedToUpdateException, WrongDateException
 from app.hotels.dao import HotelsDAO
 from app.hotels.schemas import SHotels, SHotelsCreate, SHotelsUpdate
 from app.users.dependencies import get_current_user
@@ -15,21 +15,16 @@ router = APIRouter(prefix='/hotels', tags=['Отели и номера'])
 
 
 @router.get("")
-async def get_hotels(
-        location: str,
-        date_from: date,
-        date_to: date,
-        has_spa: Optional[bool] = False,
-        stars: Optional[int] = Query(None, ge=1, le=5)
+async def get_hotels_by_location_and_time(
+        location: str = Query(None, description='Введите город или часть названия'),
+        date_from: date = Query(None, description=f'Например, {datetime.now().date()}'),
+        date_to: date = Query(None, description=f'Например, {datetime.now().date()}')
 ):
+    if date_from and date_to and date_from >= date_to:
+        raise WrongDateException
 
-    return await HotelsDAO.find_all(
-        location=location,
-        date_from=date_from,
-        date_to=date_to,
-        has_spa=has_spa,
-        stars=stars
-    )
+    hotels = await HotelsDAO.search_for_hotels(location, date_from, date_to)
+    return hotels
 
 
 @router.post("")
