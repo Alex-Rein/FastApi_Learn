@@ -5,7 +5,7 @@ from fastapi import APIRouter, Request, Depends
 
 from app.bookings.dao import BookingDAO
 from app.bookings.schemas import SBooking
-from app.exceptions import RoomCannotBeBookedException, BookingIsNotExistException, BookingDeletionErrorException
+from app.exceptions import RoomCannotBeBookedException, BookingIsNotExistException, DeletionErrorException
 from app.users.dependencies import get_current_user
 from app.users.models import Users
 
@@ -38,5 +38,5 @@ async def remove_booking(
     if not booking:
         raise BookingIsNotExistException
     if booking.user_id != user.id:
-        raise BookingDeletionErrorException
+        raise DeletionErrorException
     await BookingDAO.delete(booking.id)

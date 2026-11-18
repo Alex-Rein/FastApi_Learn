@@ -1,12 +1,12 @@
 from datetime import date
-from typing import Optional, Dict
+from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
-from pydantic import Json
+from starlette import status
 
-from app.exceptions import UserIncorrectException, NoNeededFieldsException, HotelIsNotFoundException
+from app.exceptions import UserIncorrectException, NoNeededFieldsException, HotelIsNotFoundException, \
+    FailedToAddException, FailedToUpdateException
 from app.hotels.dao import HotelsDAO
-from app.hotels.models import Hotels
 from app.hotels.schemas import SHotels, SHotelsCreate, SHotelsUpdate
 from app.users.dependencies import get_current_user
 from app.users.models import Users
@@ -44,11 +44,14 @@ async def add_hotel(
     if not payload:
         raise NoNeededFieldsException
 
-    hotel = await HotelsDAO.add(
+    result = await HotelsDAO.add(
         **payload
     )
 
-    return hotel
+    if not result.status_code == (status.HTTP_201_CREATED or status.HTTP_200_OK):
+        raise FailedToAddException
+
+    return result
 
 
 @router.delete("/{hotel_id}")
@@ -59,11 +62,8 @@ async def delete_hotel(
     if not user:
         raise UserIncorrectException
 
-    result = await HotelsDAO.delete(hotel_id)
-    if not result:
+    if not await HotelsDAO.delete(hotel_id):
         raise HotelIsNotFoundException
-
-    return result
 
 
 @router.patch("/{hotel_id}")
@@ -85,6 +85,6 @@ async def update_hotel(
     )
 
     if not updated:
-        raise HotelIsNotFoundException
+        raise FailedToUpdateException
 
     return updated
